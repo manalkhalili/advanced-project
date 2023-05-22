@@ -28,7 +28,41 @@ router.get('/read',(req,res,next)=>{
         else{
             return res.status(500).json(err);
         }
-    })
-})
+    });
+});
 
+// 3- update////////////////////////////////////////////////////////////////////////////////
+router.patch('/update/:id',(req,res,next)=>{
+    const id=req.params.id;
+    let job=req.body;
+    var quary ="update job set salary=?,title=? where id=?";
+    connection.query(quary,[job.salary,job.title,id],(err,results)=>{
+        if(!err){
+            if(results.affectedRows == 0){
+                return res.status(404).json({message:"id not found"});
+            }
+            return res.status(200).json({message:"updated"});
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+// 4- delete //////////////////////////////////////
+router.delete('/delete/:id',(req,res,next)=>{
+    const id=req.params.id;
+    var quary="delete from job where id=?";
+    connection.query(quary,[id],(err,results)=>{
+        if(!err){
+            if(results.affectedRows == 0){
+                return res.status(404).json({message:"id not found"});
+            }
+            return res.status(200).json({message:"updated"});
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
 module.exports=router;
