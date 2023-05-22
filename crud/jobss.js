@@ -65,4 +65,51 @@ router.delete('/delete/:id',(req,res,next)=>{
         }
     });
 });
+
+
+//5 search where title =x///////////////
+router.get('/readt/:title',(req,res,next)=>{
+    const title=req.params.title;
+    var quary = "select * from job where title=?";
+    connection.query(quary,[title],(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+//6 search where location =x///////////////
+router.get('/readl/:location',(req,res,next)=>{
+    const location=req.params.location;
+    var quary = "select * from job where location=?";
+
+    connection.query(quary,[location],(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+//7 search where salary =x///////////////
+router.get('/reads/:salary',(req,res,next)=>{
+    const salary=req.params.salary;
+    var quary = "select * from job where salary=?";
+
+    connection.query(quary,[salary],(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+
 module.exports=router;
