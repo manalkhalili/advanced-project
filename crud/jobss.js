@@ -67,7 +67,7 @@ router.delete('/delete/:id',(req,res,next)=>{
     });
 });
 
-<<<<<<< HEAD
+
 // sign up for job seeker/////////////////
 router.post('/signupSeeker',(req,res,next)=>{
     let newSeeker=req.body;
@@ -158,5 +158,5 @@ router.get('/reads/:salary',(req,res,next)=>{
 });
 
 
->>>>>>> 7627b3dc0bd01501b73a145e7bf4047bf9dff864
+
 module.exports=router;
