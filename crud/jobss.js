@@ -92,9 +92,10 @@ router.post('/signupSeeker',(req,res,next)=>{
             }
             else{
                 const saltRounds=10;
-                bcrypt.hash(newSeeker.password,saltRounds).then(hashpass=>{
+                let hash=bcrypt.hashSync(newSeeker.password,saltRounds);
+                console.log(hash.length);
                     var quary="insert into signup(email,username,password,birthDate,major,gender,city,phone,expertIn) values(?,?,?,?,?,?,?,?,?)";
-                    connection.query(quary,[newSeeker.email,newSeeker.username,hashpass,newSeeker.birthdate,newSeeker.major,newSeeker.gender,newSeeker.city,newSeeker.phone,newSeeker.expertIn],(err,results)=>{
+                    connection.query(quary,[newSeeker.email,newSeeker.username,hash,newSeeker.birthdate,newSeeker.major,newSeeker.gender,newSeeker.city,newSeeker.phone,newSeeker.expertIn],(err,results)=>{
                         if(!err){
                             return res.status(200).json({massage: "New user is inserted"});
                         }
@@ -102,15 +103,47 @@ router.post('/signupSeeker',(req,res,next)=>{
                             return res.status(500).json(err);
                         }
                     });
-                })
-                .catch(err=>{
-                    res.json(err);
-                })
+                
+                
             }
         })
     }
 
 });
+
+// log in (job seeker)////////////////////////////
+router.post('/loginSeeker',(req,res,next)=>{
+    let seeker=req.body;
+    if(seeker.email=="" || seeker.password==""){
+        return res.status(500).json({massage: "Email or Password is blank!!"});
+    }
+    else{
+        var quary="select * from signup where email=?";
+        connection.query(quary,[seeker.email],(err,results)=>{
+            if(results.length){
+                const saltRounds=10;
+                let hash=results[0].password;
+                
+                console.log(results[0].password);
+                console.log(hash);
+                    
+                    if(bcrypt.compareSync(seeker.password,hash)){
+                        return res.status(200).json({message:"Log in success, WELCOME Back!"});
+                    }
+                    else{
+                        return res.status(500).json(err);
+
+                    }
+            
+
+            }
+            else{
+                
+                return res.status(500).json(err);
+            }
+        });
+    }
+})
 
 
 //5 search where title =x///////////////
