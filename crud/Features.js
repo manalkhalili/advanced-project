@@ -1,31 +1,20 @@
-const app = express();
-app.use(bodyParser.json());
+const express=require ('express');
+const connection=require('../connection');
+const router = express.Router();
 
-app.get('/list', (req, res,next) => {
-    const query = 'SELECT * FROM jobs';
-    pool.query(query, (error, results) => {
-      if (error) {
-        console.error('Error executing MySQL query:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      } else {
-        res.json(results);
+router.get('/read',(req,res,next)=>{
+  var quary = "select *from job";
+  connection.query(quary,(err,results)=>{
+      if(!err){
+          return res.status(200).json(results);
       }
-    });
+      else{
+          return res.status(500).json(err);
+      }
   });
+});
   
-  /*app.post('/jobs', (req, res) => {
-    const { title, abouttherole, requirements, salary } = req.body;
-    const query = `INSERT INTO jobs (title, abouttherole, requirements, salary) VALUES (?, ?, ?, ?)`;
-    const values = [title, abouttherole, requirements, salary];
-    pool.query(query, values, (error, result) => {
-      if (error) {
-        console.error('Error executing MySQL query:', error);
-        res.status(500).json({ error: 'Internal server error' });
-      } else {
-        res.status(201).json({ id: result.insertId, ...req.body });
-      }
-    });
-  });*/
+ 
   
   
 
