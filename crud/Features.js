@@ -1,7 +1,7 @@
 const app = express();
 app.use(bodyParser.json());
 
-app.get('/jobs', (req, res) => {
+app.get('/list', (req, res,next) => {
     const query = 'SELECT * FROM jobs';
     pool.query(query, (error, results) => {
       if (error) {
@@ -27,9 +27,6 @@ app.get('/jobs', (req, res) => {
     });
   });*/
   
-  // Start the server
-  app.listen(4002, () => {
-    console.log('Server started on port 4002');
-  });
+  
 
 
