@@ -2,14 +2,22 @@ const express=require ('express');
 const connection=require('../connection');
 const router = express.Router();
 
-app.get('/list', (req, res,next) => {
-    const query = 'SELECT * FROM jobs';
-    pool.query(query, (error, results) => {
-      if (error) {
-        console.error('Error executing MySQL query:', error);
-        res.status(200).json({ error: 'Internal server error' });
-      } else {
-        res.json(results);
-      }
+// crud///////////////////////////
+
+
+
+//////////////////list///////////////
+
+router.get('/list',(req,res,next)=>{
+    var quary = "select *from job";
+    connection.query(quary,(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
     });
   });
+  
+module.exports=router;
