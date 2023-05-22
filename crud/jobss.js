@@ -143,7 +143,83 @@ router.post('/loginSeeker',(req,res,next)=>{
             }
         });
     }
-})
+});
+
+// sign up new company////////////////
+router.post('/signupCompany',(req,res,next)=>{
+    let newCompany=req.body;
+    if(newCompany.COname=="" || newCompany.email=="" || newCompany.password=="" || newCompany.location=="" || newCompany.discription=="" || newCompany.phone=="" || newCompany.feild==""){
+        return res.status(500).json({massage: "Make sure to fill all information please!!"});
+    }
+    else if(!/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(newCompany.email)){
+        return res.status(500).json({massage: "Invalid Email!!"});
+    }
+    else if(newCompany.password.length <8){
+        return res.status(500).json({massage: "Password is short!!"});
+    }
+    else if(!/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(newCompany.password)){
+        return res.status(500).json({massage: "Password should has at least a symbol, upper and lower case letters and a number"});
+        
+    }else{
+        var quary="select * from company where email=?";
+        connection.query(quary,[newCompany.email],(err,results)=>{
+            if(results.length){
+                return res.status(500).json({massage: "This email is already exist!!"});
+            }
+            else{
+                const saltRounds=10;
+                let hash=bcrypt.hashSync(newCompany.password,saltRounds);
+                console.log(hash.length);
+                    var quary="insert into company(email,name,password,location,feild,phone,discription) values(?,?,?,?,?,?,?)";
+                    connection.query(quary,[newCompany.email,newCompany.COname,hash,newCompany.location,newCompany.feild,newCompany.phone,newCompany.discription],(err,results)=>{
+                        if(!err){
+                            return res.status(200).json({massage: "New Company is Signed UP"});
+                        }
+                        else{
+                            return res.status(500).json(err);
+                        }
+                    });
+                
+                
+            }
+        })
+    }
+
+});
+
+// log in company////////////////////
+
+router.post('/loginCompany',(req,res,next)=>{
+    let company=req.body;
+    if(company.email=="" || company.password==""){
+        return res.status(500).json({massage: "Email or Password is blank!!"});
+    }else{
+        var quary="select * from company where email=?";
+        connection.query(quary,[company.email],(err,results)=>{
+            if(results.length){
+                const saltRounds=10;
+                let hash=results[0].password;
+                
+                console.log(results[0].password);
+                console.log(hash);
+                    
+                    if(bcrypt.compareSync(company.password,hash)){
+                        return res.status(200).json({message:"Log in success, WELCOME Back!"});
+                    }
+                    else{
+                        return res.status(500).json({message:"Email or Password is wrong!!"});
+
+                    }
+            
+
+            }
+            else{
+                
+                return res.status(500).json({message:"Email or Password is wrong!!"});
+            }
+        });
+    }
+});
 
 
 //5 search where title =x///////////////
