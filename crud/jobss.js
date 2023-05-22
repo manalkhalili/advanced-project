@@ -1,6 +1,7 @@
 const express=require ('express');
 const connection=require('../connection');
 const router = express.Router();
+const bcrypt=require('bcrypt');
 
 // crud///////////////////////////
 
@@ -67,6 +68,51 @@ router.delete('/delete/:id',(req,res,next)=>{
 });
 
 
+// sign up for job seeker/////////////////
+router.post('/signupSeeker',(req,res,next)=>{
+    let newSeeker=req.body;
+    if(newSeeker.username=="" || newSeeker.email=="" || newSeeker.password=="" || newSeeker.birthdate=="" || newSeeker.city=="" || newSeeker.phone=="" || newSeeker.gender=="" || newSeeker.major=="" || newSeeker.expertIn==""){
+        return res.status(500).json({massage: "Make sure to fill all information please!!"});
+    }
+    else if(!/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(newSeeker.email)){
+        return res.status(500).json({massage: "Invalid Email!!"});
+    }
+    else if(newSeeker.password.length <8){
+        return res.status(500).json({massage: "Password is short!!"});
+    }
+    else if(!/^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(newSeeker.password)){
+        return res.status(500).json({massage: "Password should has at least a symbol, upper and lower case letters and a number"});
+        
+    }
+    else{
+        var quary="select * from signup where email=?";
+        connection.query(quary,[newSeeker.email],(err,results)=>{
+            if(results.length){
+                return res.status(500).json({massage: "This email is already exist!!"});
+            }
+            else{
+                const saltRounds=10;
+                bcrypt.hash(newSeeker.password,saltRounds).then(hashpass=>{
+                    var quary="insert into signup(email,username,password,birthDate,major,gender,city,phone,expertIn) values(?,?,?,?,?,?,?,?,?)";
+                    connection.query(quary,[newSeeker.email,newSeeker.username,hashpass,newSeeker.birthdate,newSeeker.major,newSeeker.gender,newSeeker.city,newSeeker.phone,newSeeker.expertIn],(err,results)=>{
+                        if(!err){
+                            return res.status(200).json({massage: "New user is inserted"});
+                        }
+                        else{
+                            return res.status(500).json(err);
+                        }
+                    });
+                })
+                .catch(err=>{
+                    res.json(err);
+                })
+            }
+        })
+    }
+
+});
+
+
 //5 search where title =x///////////////
 router.get('/readt/:title',(req,res,next)=>{
     const title=req.params.title;
@@ -110,6 +156,7 @@ router.get('/reads/:salary',(req,res,next)=>{
         }
     });
 });
+
 
 
 module.exports=router;
