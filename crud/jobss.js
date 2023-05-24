@@ -3,10 +3,13 @@ const connection=require('../connection');
 const router = express.Router();
 const bcrypt=require('bcrypt');
 
+const fileUpload=require('express-fileupload');
+
+
 // crud///////////////////////////
 
 //1- creat//////////
-router.post('/create',(req,res,next)=>{
+router.post('/create',(req,res)=>{
     let job=req.body;
     query="insert into job (title,location,terms,salary,requirments,aboutus,abouttherole,contactus) values(?,?,?,?,?,?,?,?)";
     connection.query(query,[job.title,job.location,job.terms,job.salary,job.requirments,job.aboutus,job.abouttherole,job.contactus],(err,results)=>{
@@ -85,7 +88,7 @@ router.post('/signupSeeker',(req,res,next)=>{
         
     }
     else{
-        var quary="select * from signup where email=?";
+        var quary="select * from users where email=?";
         connection.query(quary,[newSeeker.email],(err,results)=>{
             if(results.length){
                 return res.status(500).json({massage: "This email is already exist!!"});
@@ -94,7 +97,7 @@ router.post('/signupSeeker',(req,res,next)=>{
                 const saltRounds=10;
                 let hash=bcrypt.hashSync(newSeeker.password,saltRounds);
                 console.log(hash.length);
-                    var quary="insert into signup(email,username,password,birthDate,major,gender,city,phone,expertIn) values(?,?,?,?,?,?,?,?,?)";
+                    var quary="insert into users(email,username,password,birthDate,major,gender,city,phone,expertIn) values(?,?,?,?,?,?,?,?,?)";
                     connection.query(quary,[newSeeker.email,newSeeker.username,hash,newSeeker.birthdate,newSeeker.major,newSeeker.gender,newSeeker.city,newSeeker.phone,newSeeker.expertIn],(err,results)=>{
                         if(!err){
                             return res.status(200).json({massage: "New user is inserted"});
@@ -118,7 +121,7 @@ router.post('/loginSeeker',(req,res,next)=>{
         return res.status(500).json({massage: "Email or Password is blank!!"});
     }
     else{
-        var quary="select * from signup where email=?";
+        var quary="select * from users where email=?";
         connection.query(quary,[seeker.email],(err,results)=>{
             if(results.length){
                 const saltRounds=10;
@@ -251,10 +254,10 @@ router.get('/readl/:location',(req,res,next)=>{
     });
 });
 
-//7 search where salary =x///////////////
-router.get('/reads/:salary',(req,res,next)=>{
+//7 search where salary is grater than x///////////////
+router.get('/readSalaryGreater/:salary',(req,res,next)=>{
     const salary=req.params.salary;
-    var quary = "select * from job where salary=?";
+    var quary = "select * from job where salary>?";
 
     connection.query(quary,[salary],(err,results)=>{
         if(!err){
@@ -265,6 +268,29 @@ router.get('/reads/:salary',(req,res,next)=>{
         }
     });
 });
+
+//7 search where salary is less than x///////////////
+router.get('/readSalaryLess/:salary',(req,res,next)=>{
+    const salary=req.params.salary;
+    var quary = "select * from job where salary<?";
+
+    connection.query(quary,[salary],(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+// list all jobs of a company /////////////////////////////////
+
+router.get('/myJobs/:salary',(req,res,next)=>{
+    
+
+})
+
 
 
 
