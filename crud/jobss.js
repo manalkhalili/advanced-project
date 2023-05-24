@@ -226,7 +226,7 @@ router.post('/loginCompany',(req,res,next)=>{
 
 
 //5 search where title =x///////////////
-router.get('/readt/:title',(req,res,next)=>{
+router.get('/readtitle/:title',(req,res,next)=>{
     const title=req.params.title;
     var quary = "select * from job where title=?";
     connection.query(quary,[title],(err,results)=>{
@@ -240,7 +240,7 @@ router.get('/readt/:title',(req,res,next)=>{
 });
 
 //6 search where location =x///////////////
-router.get('/readl/:location',(req,res,next)=>{
+router.get('/readlocation/:location',(req,res,next)=>{
     const location=req.params.location;
     var quary = "select * from job where location=?";
 
@@ -254,23 +254,8 @@ router.get('/readl/:location',(req,res,next)=>{
     });
 });
 
-//7 search where salary is grater than x///////////////
-router.get('/readSalaryGreater/:salary',(req,res,next)=>{
-    const salary=req.params.salary;
-    var quary = "select * from job where salary>?";
-
-    connection.query(quary,[salary],(err,results)=>{
-        if(!err){
-            return res.status(200).json(results);
-        }
-        else{
-            return res.status(500).json(err);
-        }
-    });
-});
-
-//7 search where salary is less than x///////////////
-router.get('/readSalaryLess/:salary',(req,res,next)=>{
+//7 search where salary =x///////////////
+router.get('/reads/:salary',(req,res,next)=>{
     const salary=req.params.salary;
     var quary = "select * from job where salary<?";
 
@@ -283,14 +268,6 @@ router.get('/readSalaryLess/:salary',(req,res,next)=>{
         }
     });
 });
-
-// list all jobs of a company /////////////////////////////////
-
-router.get('/myJobs/:salary',(req,res,next)=>{
-    
-
-})
-
 
 
 
