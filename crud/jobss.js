@@ -225,7 +225,7 @@ router.post('/loginCompany',(req,res,next)=>{
 
 
 //5 search where title =x///////////////
-router.get('/readt/:title',(req,res,next)=>{
+router.get('/readtitle/:title',(req,res,next)=>{
     const title=req.params.title;
     var quary = "select * from job where title=?";
     connection.query(quary,[title],(err,results)=>{
@@ -239,7 +239,7 @@ router.get('/readt/:title',(req,res,next)=>{
 });
 
 //6 search where location =x///////////////
-router.get('/readl/:location',(req,res,next)=>{
+router.get('/readlocation/:location',(req,res,next)=>{
     const location=req.params.location;
     var quary = "select * from job where location=?";
 
@@ -254,7 +254,7 @@ router.get('/readl/:location',(req,res,next)=>{
 });
 
 //7 search where salary =x///////////////
-router.get('/reads/:salary',(req,res,next)=>{
+router.get('/readsalary/:salary',(req,res,next)=>{
     const salary=req.params.salary;
     var quary = "select * from job where salary=?";
 
@@ -267,6 +267,69 @@ router.get('/reads/:salary',(req,res,next)=>{
         }
     });
 });
+
+//8 search where company name=x
+router.get('/readcompany/:companyname',(req,res,next)=>{
+    const companyname=req.params.companyname;
+    var quary = "select * from job where companyname=?";
+
+    connection.query(quary,[companyname],(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+
+//apply for job 
+router.post('/apply',(req,res,next)=>{
+    let joblink=req.body;
+    query="insert into joblink (seekeremail,jobuniqueid) values(?,?)";
+    connection.query(query,[joblink.seekeremail,joblink.jobuniqueid],(err,results)=>{
+        if(!err){
+            return res.status(200).json({massage: "Application is inserted successfully"});
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+
+//see who apply for this job 
+router.get('/readlink/:jobuniqueid',(req,res,next)=>{
+    const jobuniqueid=req.params.jobuniqueid;
+    var quary = "select * from joblink where jobuniqueid=?";
+    connection.query(quary,[jobuniqueid],(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+
+
+//see who apply for this job through thier email 
+router.get('/readprofile/:seekeremail',(req,res,next)=>{
+    const seekeremail=req.params.seekeremail;
+    var quary = "select * from  seekerprofile where email=?";
+    connection.query(quary,[seekeremail],(err,results)=>{
+        if(!err){
+            return res.status(200).json(results);
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+
 
 
 
