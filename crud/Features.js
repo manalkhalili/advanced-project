@@ -1,29 +1,35 @@
 //////////////////// ext1///////////
-const axios = require('axios');
 
-const options = {
-  method: 'POST',
-  url: 'https://linkedin-profiles-and-company-data.p.rapidapi.com/profile-details',
-  headers: {
-    'content-type': 'application/json',
-    'X-RapidAPI-Key': 'aac3ab1dc6mshdf2a3c55f2cc77bp10295cjsn63b266513440',
-    'X-RapidAPI-Host': 'linkedin-profiles-and-company-data.p.rapidapi.com'
-  },
-  data: {
-    profile_id: 'williamhgates',
-    profile_type: 'personal',
-    contact_info: false,
-    recommendations: false,
-    related_profiles: false
+router.get('/', async (req, res) => {
+  const searchTerms = req.query.search_terms || 'python programmer';
+  const location = req.query.location || 'Chicago, IL';
+  const page = req.query.page || '1';
+
+  const options = {
+    method: 'POST',
+    url: 'https://linkedin-jobs-search.p.rapidapi.com/',
+    headers: {
+      'content-type': 'application/json',
+      'X-RapidAPI-Key': 'bf07d1bcadmsh1a5ceb557fde6b6p10b8abjsn95b283f95708',
+      'X-RapidAPI-Host': 'linkedin-jobs-search.p.rapidapi.com'
+    },
+    data: {
+      search_terms: searchTerms,
+      location: location,
+      page: page
+    }
+  };
+
+  try {
+    const response = await axios.request(options);
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred');
   }
-};
+});
 
-try {
-	const response = await axios.request(options);
-	console.log(response.data);
-} catch (error) {
-	console.error(error);
-};
+module.exports = router;
 ///////////ext2//////////
 const axios = require('axios');
 
@@ -42,3 +48,38 @@ try {
 } catch (error) {
 	console.error(error);
 }
+//////////////////////////
+
+
+
+
+router.get('/', async (req, res) => {
+  const searchTerms = req.query.search_terms || 'python programmer';
+  const location = req.query.location || 'Chicago, IL';
+  const page = req.query.page || '1';
+
+  const options = {
+    method: 'POST',
+    url: 'https://linkedin-jobs-search.p.rapidapi.com/',
+    headers: {
+      'content-type': 'application/json',
+      'X-RapidAPI-Key': 'bf07d1bcadmsh1a5ceb557fde6b6p10b8abjsn95b283f95708',
+      'X-RapidAPI-Host': 'linkedin-jobs-search.p.rapidapi.com'
+    },
+    data: {
+      search_terms: searchTerms,
+      location: location,
+      page: page
+    }
+  };
+
+  try {
+    const response = await axios.request(options);
+    res.json(response.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+module.exports = router;
