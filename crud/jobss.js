@@ -3,13 +3,17 @@ const connection=require('../connection');
 const router = express.Router();
 const bcrypt=require('bcrypt');
 
+
+
+
 // crud///////////////////////////
 
-//1- creat//////////
-router.post('/create',(req,res,next)=>{
+//1- creat new job //////////
+router.post('/createJob/:id',(req,res)=>{
+    const id=req.params.id;
     let job=req.body;
-    query="insert into job (title,location,terms,salary,requirments,aboutus,abouttherole,contactus) values(?,?,?,?,?,?,?,?)";
-    connection.query(query,[job.title,job.location,job.terms,job.salary,job.requirments,job.aboutus,job.abouttherole,job.contactus],(err,results)=>{
+    query="insert into job (keyword,companyID,title,location,terms,salary,requirments,aboutus,abouttherole,contactus) values(?,?,?,?,?,?,?,?,?,?)";
+    connection.query(query,[job.keyword,id,job.title,job.location,job.terms,job.salary,job.requirments,job.aboutus,job.abouttherole,job.contactus],(err,results)=>{
         if(!err){
             return res.status(200).json({massage: "job is inserted successfully"});
         }
@@ -19,7 +23,7 @@ router.post('/create',(req,res,next)=>{
     });
 });
 
-//2- read //////////////////////////////////////////////////////////////////
+//2- read all jobs //////////////////////////////////////////////////////////////////
 router.get('/read',(req,res,next)=>{
     var quary = "select *from job";
     connection.query(quary,(err,results)=>{
@@ -32,12 +36,12 @@ router.get('/read',(req,res,next)=>{
     });
 });
 
-// 3- update////////////////////////////////////////////////////////////////////////////////
+// 3- update job ////////////////////////////////////////////////////////////////////////////////
 router.patch('/update/:id',(req,res,next)=>{
     const id=req.params.id;
     let job=req.body;
-    var quary ="update job set salary=?,title=? where id=?";
-    connection.query(quary,[job.salary,job.title,id],(err,results)=>{
+    var quary ="update job set title=?,location=?,terms=?,salary=?,requirments=?,aboutus=?,abouttherole=?,contactus=? where keyword=?";
+    connection.query(quary,[job.title,job.location,job.terms,job.salary,job.requirments,job.aboutus,job.abouttherole,job.contactus,id],(err,results)=>{
         if(!err){
             if(results.affectedRows == 0){
                 return res.status(404).json({message:"id not found"});
@@ -53,7 +57,7 @@ router.patch('/update/:id',(req,res,next)=>{
 // 4- delete //////////////////////////////////////
 router.delete('/delete/:id',(req,res,next)=>{
     const id=req.params.id;
-    var quary="delete from job where id=?";
+    var quary="delete from job where keyword=?";
     connection.query(quary,[id],(err,results)=>{
         if(!err){
             if(results.affectedRows == 0){
@@ -71,7 +75,7 @@ router.delete('/delete/:id',(req,res,next)=>{
 // sign up for job seeker/////////////////
 router.post('/signupSeeker',(req,res,next)=>{
     let newSeeker=req.body;
-    if(newSeeker.username=="" || newSeeker.email=="" || newSeeker.password=="" || newSeeker.birthdate=="" || newSeeker.city=="" || newSeeker.phone=="" || newSeeker.gender=="" || newSeeker.major=="" || newSeeker.expertIn==""){
+    if(newSeeker.username=="" || newSeeker.email=="" || newSeeker.password=="" || newSeeker.birthdate=="" || newSeeker.city=="" || newSeeker.phone=="" || newSeeker.gender=="" ){
         return res.status(500).json({massage: "Make sure to fill all information please!!"});
     }
     else if(!/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(newSeeker.email)){
@@ -85,7 +89,7 @@ router.post('/signupSeeker',(req,res,next)=>{
         
     }
     else{
-        var quary="select * from signup where email=?";
+        var quary="select * from users where email=?";
         connection.query(quary,[newSeeker.email],(err,results)=>{
             if(results.length){
                 return res.status(500).json({massage: "This email is already exist!!"});
@@ -94,8 +98,8 @@ router.post('/signupSeeker',(req,res,next)=>{
                 const saltRounds=10;
                 let hash=bcrypt.hashSync(newSeeker.password,saltRounds);
                 console.log(hash.length);
-                    var quary="insert into signup(email,username,password,birthDate,major,gender,city,phone,expertIn) values(?,?,?,?,?,?,?,?,?)";
-                    connection.query(quary,[newSeeker.email,newSeeker.username,hash,newSeeker.birthdate,newSeeker.major,newSeeker.gender,newSeeker.city,newSeeker.phone,newSeeker.expertIn],(err,results)=>{
+                    var quary="insert into users(email,username,password,birthDate,gender,city,phone) values(?,?,?,?,?,?,?)";
+                    connection.query(quary,[newSeeker.email,newSeeker.username,hash,newSeeker.birthdate,newSeeker.gender,newSeeker.city,newSeeker.phone],(err,results)=>{
                         if(!err){
                             return res.status(200).json({massage: "New user is inserted"});
                         }
@@ -118,7 +122,7 @@ router.post('/loginSeeker',(req,res,next)=>{
         return res.status(500).json({massage: "Email or Password is blank!!"});
     }
     else{
-        var quary="select * from signup where email=?";
+        var quary="select * from users where email=?";
         connection.query(quary,[seeker.email],(err,results)=>{
             if(results.length){
                 const saltRounds=10;
@@ -131,7 +135,7 @@ router.post('/loginSeeker',(req,res,next)=>{
                         return res.status(200).json({message:"Log in success, WELCOME Back!"});
                     }
                     else{
-                        return res.status(500).json(err);
+                        return res.status(500).json({message:"Email or Password is wrong!!"});
 
                     }
             
@@ -139,10 +143,29 @@ router.post('/loginSeeker',(req,res,next)=>{
             }
             else{
                 
-                return res.status(500).json(err);
+                return res.status(500).json({message:"Email or Password is wrong!!"});
             }
         });
     }
+});
+
+// fill the prifile////////////////////////////////////////
+router.post('/profile/:id',(req,res,next)=>{
+    const id=req.params.id;
+    var user=req.body;
+    if(user.email=="" || user.fullname=="" || user.skills=="" || user.languages=="" ||user.experiences=="" || user.education=="" || user.phone==""){
+        return res.status(400).json({message: "Make sure to all the informations!!"});
+    }
+    var quary="insert into profile (id,email,fullname,skills,languages,experience,education,phone) values(?,?,?,?,?,?,?,?)";
+    connection.query(quary,[id,user.email,user.fullname,user.skills,user.languages,user.experiences,user.education,user.phone],(err,results)=>{
+        if(!err){
+            return res.status(200).json({message:"Profile filled sucessfully!"});
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+
 });
 
 // sign up new company////////////////
@@ -251,14 +274,19 @@ router.get('/readlocation/:location',(req,res,next)=>{
     });
 });
 
-//7 search where salary =x///////////////
-router.get('/readsalary/:salary',(req,res,next)=>{
+//7 search where salary is greater than x///////////////
+router.get('/readSalaryG/:salary',(req,res,next)=>{
     const salary=req.params.salary;
-    var quary = "select * from job where salary=?";
+    var quary = "select * from job where salary>=?";
 
     connection.query(quary,[salary],(err,results)=>{
         if(!err){
-            return res.status(200).json(results);
+            if(results.length==0){
+                return res.status(404).json({message:"No jobs with Salary grater than "+salary});
+            }
+            else{
+                return res.status(200).json(results);
+            }
         }
         else{
             return res.status(500).json(err);
@@ -266,7 +294,29 @@ router.get('/readsalary/:salary',(req,res,next)=>{
     });
 });
 
-//8 search for company id where company name=x
+
+// //7 search where salary is less than x///////////////
+router.get('/readSalaryL/:salary',(req,res,next)=>{
+    const salary=req.params.salary;
+    var quary = "select * from job where salary<?";
+
+    connection.query(quary,[salary],(err,results)=>{
+        if(!err){
+            if(results.length==0){
+                return res.status(404).json({message:"No jobs with Salary less than "+salary});
+            }
+            else{
+                return res.status(200).json(results);
+            }
+        }
+        else{
+            return res.status(500).json(err);
+        }
+    });
+});
+
+
+//8 search by company name=x //////////////////////////////////////
 router.get('/readcompany/:name',(req,res,next)=>{
     const name=req.params.name;
     var quary = "select id from company where name=?";
@@ -292,6 +342,7 @@ router.get('/readcompany/:name',(req,res,next)=>{
 
 
 
+
 //apply for job 
 router.post('/apply',(req,res,next)=>{
     let jobappliers=req.body;
@@ -307,50 +358,41 @@ router.post('/apply',(req,res,next)=>{
 });
 
 
-///////////////////////need to be edited 
+
 
 //see who apply for this job 
 router.get('/readappliers/:jobid',(req,res,next)=>{
     const jobid=req.params.jobid;
     var quary = "select * from jobappliers where jobid=?";
+    var r;
+    var arr=[];
+    var jsonarr=[];
+    var l;
     connection.query(quary,[jobid],(err,results)=>{
-        if(!err){
+        l=results.length;
+        console.log(l);
+        
+        for(var i=0;i<l;i++){
+            arr[i]=results[i].email;
+            console.log(arr[i]);
+        }
+    });
+            for(var i=0;i<l;i++){
+                var quary = "select * from  profile where email=?";
+                connection.query(quary,[arr[i]],(err,results)=>{
+                //jsonarr[i]=results;
+                console.log(results);
+                 return res.json(results);
+            });
+            }
             
-    var quary = "select * from  profile where email=?";
-    connection.query(quary,[email],(err,results)=>{
-        if(!err){
-            return res.status(200).json(results);
-        }
-        else{
-            return res.status(500).json(err);
-        }
-    });
-        }
-
-        else{
-            return res.status(500).json(err);
-        }
-    });
+            //console.log(jsonarr);
+             //res.write(jsonarr);
+           // return res.json(jsonarr);
+        
+           
+    
 });
-
-
-
-//see who apply for this job through thier email 
-router.get('/readprofile/:email',(req,res,next)=>{
-    const email=req.params.email;
-    var quary = "select * from  profile where email=?";
-    connection.query(quary,[email],(err,results)=>{
-        if(!err){
-            return res.status(200).json(results);
-        }
-        else{
-            return res.status(500).json(err);
-        }
-    });
-});
-
-
-
 
 
 module.exports=router;
